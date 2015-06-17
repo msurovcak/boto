@@ -26,6 +26,7 @@ Represents a connection to the EC2 service.
 """
 
 import base64
+import os
 import warnings
 from datetime import datetime
 from datetime import timedelta
@@ -105,6 +106,14 @@ class EC2Connection(AWSQueryConnection):
             self.APIVersion = api_version
 
     def _required_auth_capability(self):
+        """
+        Returns ['hmac-v4'] unless you force ['ec2'], for compatibility
+        reasons.
+        """
+        if os.environ.get('EC2_FORCE_V2', False):
+            return ['ec2']
+        if boto.config.get('EC2_FORCE_V2', False):
+            return ['ec2']
         return ['hmac-v4']
 
     def get_params(self):
